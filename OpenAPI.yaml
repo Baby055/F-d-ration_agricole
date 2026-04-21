@@ -5,4 +5,54 @@ info:
   description: |
     Spécification OAS pour la gestion des collectivités agricoles.
     Inclut les nouvelles conditions d'admission (B-2) et les statistiques fédération (H).
-    
+
+servers:
+  - url: https://api.federation-agricole.mg/v1
+
+paths:
+  /collectivites:
+    post:
+      summary: A - Ouverture d'une nouvelle collectivité
+      operationId: createCollectivite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nom
+                - specialite
+                - ville
+                - dateCreation
+                - autorisationFederation
+                - membresFondateurs
+              properties:
+                nom:
+                  type: string
+                specialite:
+                  type: string
+                ville:
+                  type: string
+                dateCreation:
+                  type: string
+                  format: date
+                autorisationFederation:
+                  type: string
+                membresFondateurs:
+                  type: array
+                  minItems: 10
+                  items:
+                    type: object
+                    required:
+                      - membreId
+                      - poste
+                    properties:
+                      membreId:
+                        type: integer
+                      poste:
+                        type: string
+                        enum: [ president, adjoint, tresorier, secretaire, confirme, junior ]
+      responses:
+        '201':
+          description: Collectivité créée
