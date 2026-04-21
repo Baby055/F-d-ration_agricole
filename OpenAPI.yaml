@@ -56,3 +56,84 @@ paths:
       responses:
         '201':
           description: Collectivité créée
+
+  /membres/adhesion:
+    post:
+      summary: B-2 - Admission d'un nouveau membre (conditions mises à jour)
+      operationId: adhererCollectivite
+      description: |
+        Nouvelles conditions :
+        - Parrainage par au moins 2 membres confirmés.
+        - Règle : #parrains de la collectivité cible >= #parrains des autres collectivités.
+        - Fournir la relation avec chaque parrain.
+        - Payer 50 000 Ar (frais adhésion) + la totalité des cotisations annuelles obligatoires de la collectivité.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - collectiviteId
+                - parrains
+                - nom
+                - prenom
+                - dateNaissance
+                - genre
+                - adresse
+                - metier
+                - telephone
+                - email
+                - modePaiementAdhesion
+                - referencePaiementAdhesion
+                - modePaiementCotisationAnnuelle
+                - referencePaiementCotisationAnnuelle
+              properties:
+                collectiviteId:
+                  type: integer
+                parrains:
+                  type: array
+                  minItems: 2
+                  items:
+                    type: object
+                    required:
+                      - membreId
+                      - relation
+                    properties:
+                      membreId:
+                        type: integer
+                      relation:
+                        type: string
+                        enum: [famille, amis, collegues, autre]
+                nom:
+                  type: string
+                prenom:
+                  type: string
+                dateNaissance:
+                  type: string
+                  format: date
+                genre:
+                  type: string
+                  enum: [feminin, masculin]
+                adresse:
+                  type: string
+                metier:
+                  type: string
+                telephone:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                modePaiementAdhesion:
+                  type: string
+                  enum: [mobile_money, virement_bancaire]
+                referencePaiementAdhesion:
+                  type: string
+                modePaiementCotisationAnnuelle:
+                  type: string
+                  enum: [mobile_money, virement_bancaire]
+                referencePaiementCotisationAnnuelle:
+                  type: string
+      responses:
+        '201':
+          description: Membre admis
