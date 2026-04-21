@@ -332,7 +332,7 @@ paths:
         '201':
           description: Présence enregistrée
 
-    /membres/{membreId}/taux-assiduite:
+  /membres/{membreId}/taux-assiduite:
       get:
         summary: F2 - Taux d'assiduité d'un membre
         operationId: getTauxAssiduite
@@ -358,7 +358,7 @@ paths:
           '200':
             description: Taux d'assiduité
 
-    /collectivites/{collectiviteId}/statistiques:
+  /collectivites/{collectiviteId}/statistiques:
       get:
         summary: G - Statistiques d'une collectivité
         operationId: getStatistiquesCollectivite
@@ -383,3 +383,30 @@ paths:
         responses:
           '200':
             description: Statistiques détaillées
+
+  /federation/statistiques:
+    get:
+      summary: H - Statistiques de la fédération
+      operationId: getStatistiquesFederation
+      description: |
+        Rapport mensuel/annuel contenant pour chaque collectivité :
+        - taux d'assiduité global
+        - pourcentage de membres à jour de cotisation
+        - nombre de nouveaux adhérents sur la période
+      parameters:
+        - name: dateDebut
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: dateFin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Rapport fédéral
+
