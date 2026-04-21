@@ -176,3 +176,53 @@ paths:
       responses:
         '201':
           description: Cotisation enregistrée
+
+  /comptes:
+    post:
+      summary: D1 - Créer un compte
+      operationId: creerCompte
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entiteType
+                - typeCompte
+                - titulaire
+              properties:
+                entiteType:
+                  type: string
+                  enum: [collectivite, federation]
+                entiteId:
+                  type: integer
+                typeCompte:
+                  type: string
+                  enum: [caisse, bancaire, mobile_money]
+                titulaire:
+                  type: string
+                soldeInitial:
+                  type: number
+                  default: 0
+                details:
+                  type: object
+                  oneOf:
+                    - properties:
+                        banque:
+                          type: string
+                          enum: [BRED, MCB, BMOI, BOA, BGFI, AFG, ACCES BANQUE, BAOBAB, SIPEM]
+                        numeroCompte:
+                          type: string
+                          pattern: '^\d{23}$'
+                      required: [banque, numeroCompte]
+                    - properties:
+                        serviceMobile:
+                          type: string
+                          enum: [Orange Money, Mvola, Airtel Money]
+                        numeroTelephone:
+                          type: string
+                      required: [serviceMobile, numeroTelephone]
+      responses:
+        '201':
+          description: Compte créé
