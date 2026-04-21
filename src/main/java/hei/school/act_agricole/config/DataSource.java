@@ -2,6 +2,8 @@ package hei.school.act_agricole.config;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Connection;
+
 
 public class DataSource {
     private static final String URL = "jdbc:h2:mem:federationdb;DB_CLOSE_DELAY=-1";
