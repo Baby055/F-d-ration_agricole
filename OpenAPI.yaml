@@ -299,3 +299,87 @@ paths:
       responses:
         '201':
           description: Activité créée
+
+  /presences:
+    post:
+      summary: F1 - Enregistrer une présence
+      operationId: enregistrerPresence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - activiteId
+                - membreId
+                - present
+              properties:
+                activiteId:
+                  type: integer
+                membreId:
+                  type: integer
+                present:
+                  type: boolean
+                excuse:
+                  type: boolean
+                motifAbsence:
+                  type: string
+                estInvite:
+                  type: boolean
+                  default: false
+      responses:
+        '201':
+          description: Présence enregistrée
+
+    /membres/{membreId}/taux-assiduite:
+      get:
+        summary: F2 - Taux d'assiduité d'un membre
+        operationId: getTauxAssiduite
+        parameters:
+          - name: membreId
+            in: path
+            required: true
+            schema:
+              type: integer
+          - name: dateDebut
+            in: query
+            required: true
+            schema:
+              type: string
+              format: date
+          - name: dateFin
+            in: query
+            required: true
+            schema:
+              type: string
+              format: date
+        responses:
+          '200':
+            description: Taux d'assiduité
+
+    /collectivites/{collectiviteId}/statistiques:
+      get:
+        summary: G - Statistiques d'une collectivité
+        operationId: getStatistiquesCollectivite
+        parameters:
+          - name: collectiviteId
+            in: path
+            required: true
+            schema:
+              type: integer
+          - name: dateDebut
+            in: query
+            required: true
+            schema:
+              type: string
+              format: date
+          - name: dateFin
+            in: query
+            required: true
+            schema:
+              type: string
+              format: date
+        responses:
+          '200':
+            description: Statistiques détaillées
