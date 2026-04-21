@@ -3,8 +3,8 @@ package hei.school.act_agricole.config;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DatabaseConnection {
-    private static final String URL = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1";
+public class DataSource {
+    private static final String URL = "jdbc:h2:mem:federationdb;DB_CLOSE_DELAY=-1";
     private static final String USER = "postgres";
     private static final String PASSWORD = "meilleur";
 
