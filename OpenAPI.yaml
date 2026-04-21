@@ -251,3 +251,51 @@ paths:
       responses:
         '200':
           description: Liste des comptes
+
+  /activites:
+    post:
+      summary: E - Planifier une activité
+      operationId: planifierActivite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - organisateurType
+                - titre
+                - dateHeure
+                - obligatoire
+              properties:
+                organisateurType:
+                  type: string
+                  enum: [collectivite, federation]
+                organisateurId:
+                  type: integer
+                titre:
+                  type: string
+                description:
+                  type: string
+                dateHeure:
+                  type: string
+                  format: date-time
+                obligatoire:
+                  type: boolean
+                membresConcernes:
+                  type: object
+                  properties:
+                    tous:
+                      type: boolean
+                    roles:
+                      type: array
+                      items:
+                        type: string
+                        enum: [president, adjoint, tresorier, secretaire, confirme, junior]
+                    membresSpecifiques:
+                      type: array
+                      items:
+                        type: integer
+      responses:
+        '201':
+          description: Activité créée
