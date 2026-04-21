@@ -1,0 +1,47 @@
+{
+  "name": "createCollectivite",
+  "description": "Ouvre une nouvelle collectivité agricole après vérification des conditions réglementaires (10 membres minimum avec 6 mois d'ancienneté, postes spécifiques occupés, autorisation fédérale). Retourne les détails de la collectivité créée ou une erreur.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "nom": {
+        "type": "string",
+        "description": "Nom unique de la collectivité."
+      },
+      "specialite": {
+        "type": "string",
+        "description": "Spécialité agricole exercée (ex: 'élevage bovin', 'maraîchage')."
+      },
+      "ville": {
+        "type": "string",
+        "description": "Localité (ville) où la collectivité est implantée."
+      },
+      "dateCreation": {
+        "type": "string",
+        "format": "date",
+        "description": "Date de création (format YYYY-MM-DD)."
+      },
+      "autorisationFederation": {
+        "type": "string",
+        "description": "Preuve d'autorisation formelle délivrée par la fédération (ex: numéro d'arrêté)."
+      },
+      "membresFondateurs": {
+        "type": "array",
+        "description": "Liste des membres initiaux (au moins 10). Chaque membre doit avoir une ancienneté ≥6 mois dans la fédération et un poste spécifique (président, adjoint, trésorier, secrétaire, confirmé, junior).",
+        "items": {
+          "type": "object",
+          "properties": {
+            "membreId": { "type": "integer" },
+            "poste": {
+              "type": "string",
+              "enum": ["president", "adjoint", "tresorier", "secretaire", "confirme", "junior"]
+            }
+          },
+          "required": ["membreId", "poste"]
+        }
+      }
+    },
+    "required": ["nom", "specialite", "ville", "dateCreation", "autorisationFederation", "membresFondateurs"],
+    "additionalProperties": false
+  }
+}
