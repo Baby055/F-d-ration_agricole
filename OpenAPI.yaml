@@ -137,3 +137,42 @@ paths:
       responses:
         '201':
           description: Membre admis
+
+  /cotisations:
+    post:
+      summary: C - Enregistrement d'une cotisation
+      operationId: enregistrerCotisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - collectiviteId
+                - membreId
+                - montant
+                - typeCotisation
+                - dateEncaissement
+                - modePaiement
+              properties:
+                collectiviteId:
+                  type: integer
+                membreId:
+                  type: integer
+                montant:
+                  type: number
+                typeCotisation:
+                  type: string
+                  enum: [ mensuelle, annuelle, ponctuelle ]
+                dateEncaissement:
+                  type: string
+                  format: date
+                modePaiement:
+                  type: string
+                  enum: [ espece, virement_bancaire, mobile_money ]
+                referencePaiement:
+                  type: string
+      responses:
+        '201':
+          description: Cotisation enregistrée
