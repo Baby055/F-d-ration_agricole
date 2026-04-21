@@ -8,7 +8,6 @@ public class CollectivityResponse {
     private CollectivityStructureResponse structure;
     private List<MemberResponse> members;
 
-    //getters and setters
     public String getId() {
         return id;
     }

@@ -14,7 +14,5 @@ public class CollectivityStructureResponse {
     public MemberResponse getTreasurer() { return treasurer; }  
     public void setTreasurer(MemberResponse treasurer) { this.treasurer = treasurer; }
     public MemberResponse getSecretary() { return secretary; }
-    public void setSecretary(MemberResponse secretary) { this.secretary = secretary; }  
-    
-
+    public void setSecretary(MemberResponse secretary) { this.secretary = secretary; }
 }
