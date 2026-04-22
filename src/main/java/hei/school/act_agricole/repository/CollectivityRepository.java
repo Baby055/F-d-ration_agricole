@@ -41,4 +41,36 @@ public class CollectivityRepository {
             return Optional.empty();
         }
     }
+
+        public boolean existsByNumber(String number) throws SQLException {
+            String sql = "SELECT 1 FROM collectivity WHERE unique_number = ?";
+            try (Connection conn = DataSource.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, number);
+                ResultSet rs = stmt.executeQuery();
+                return rs.next();
+            }
+        }
+
+        public boolean existsByName(String name) throws SQLException {
+            String sql = "SELECT 1 FROM collectivity WHERE unique_name = ?";
+            try (Connection conn = DataSource.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, name);
+                ResultSet rs = stmt.executeQuery();
+                return rs.next();
+            }
+        }
+
+        public void updateNumberAndName(String collectivityId, String number, String name) throws SQLException {
+            String sql = "UPDATE collectivity SET unique_number = ?, unique_name = ? WHERE id = ?";
+            try (Connection conn = DataSource.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, number);
+                stmt.setString(2, name);
+                stmt.setString(3, collectivityId);
+                int updated = stmt.executeUpdate();
+                if (updated == 0) throw new SQLException("Collectivity not found");
+            }
+        }
 }
