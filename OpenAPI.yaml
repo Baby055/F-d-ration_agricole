@@ -5,7 +5,8 @@ info:
     # Versioning
     This API uses semantic versioning (MAJOR.MINOR.PATCH). Available versions are : 
     - v0.0.1 (2026-04-21) : POST /collectivities for collectivities creation and POST /members for members creation.
-  version: 0.0.1
+    - v0.0.2 (2026-04-22) : PUT /collectivities/{collectivityId}/identification to assign unique number and name to a collectivity.
+  version: 0.0.2
 servers:
   - url: 'https://localhost:8080'
 paths:
@@ -61,6 +62,49 @@ paths:
             - Membership dues not paid or registration fee not paid.
         404:
           description: Either collectivity or member not found.
+  '/collectivities/{collectivityId}/identification':
+    put:
+      summary: Assign unique number and name to a collectivity
+      description: |
+        The federation assigns a unique number and a unique name to an existing collectivity.
+        Once assigned, they cannot be changed. If the collectivity already has a number or name,
+        or if the provided number/name already exists for another collectivity, an error is returned.
+      parameters:
+        - name: collectivityId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the collectivity to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - number
+                - name
+              properties:
+                number:
+                  type: string
+                  description: Unique number assigned by the federation (e.g., 'COL-001')
+                name:
+                  type: string
+                  description: Unique name of the collectivity (e.g., 'Fianarantsoa Rice Growers')
+      responses:
+        200:
+          description: Collectivity updated with number and name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collectivity'
+        400:
+          description: Bad request (e.g., number or name already used by another collectivity)
+        404:
+          description: Collectivity not found
+        409:
+          description: Conflict - the collectivity already has a number or name assigned (cannot be changed)
 components:
   schemas:
     CreateCollectivity:
@@ -112,6 +156,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Member'
+        number:
+          type: string
+          description: Unique number assigned by the federation (nullable if not yet assigned)
+        name:
+          type: string
+          description: Unique name assigned by the federation (nullable if not yet assigned)
     MemberIdentifier:
       type: string
     CreateMember:
