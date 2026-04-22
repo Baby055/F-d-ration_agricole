@@ -29,7 +29,7 @@ public class CollectivityController {
     public ResponseEntity<CollectivityResponse> assignIdentification(
             @PathVariable String collectivityId,
             @RequestBody AssignIdentificationRequest request) {
-        CollectivityResponse response = collectivityService.assignIdentification(
+        CollectivityResponse response = service.assignIdentification(
                 collectivityId, request.getNumber(), request.getName());
         return ResponseEntity.ok(response);
     }
