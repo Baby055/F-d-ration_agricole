@@ -1,13 +1,19 @@
 package hei.school.act_agricole.repository;
 
 import hei.school.act_agricole.config.DataSource;
+import hei.school.act_agricole.entity.Member;
 import hei.school.act_agricole.entity.Membership;
+import hei.school.act_agricole.enums.Gender;
+import hei.school.act_agricole.enums.MemberOccupation;
+
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
@@ -38,4 +44,32 @@ public class MembershipRepository {
             return Optional.empty();
         }
     }
+
+    public List<Member> findMembersByCollectivityId(String collectivityId) throws SQLException {
+    String sql = "SELECT m.* FROM member m " +
+                 "JOIN membership ms ON m.id = ms.member_id " +
+                 "WHERE ms.collectivity_id = ? AND ms.end_date IS NULL";
+    try (Connection conn = DataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, collectivityId);
+        ResultSet rs = stmt.executeQuery();
+        List<Member> members = new ArrayList<>();
+        while (rs.next()) {
+            Member m = new Member();
+            m.setId(rs.getString("id"));
+            m.setFirstName(rs.getString("first_name"));
+            m.setLastName(rs.getString("last_name"));
+            m.setBirthDate(rs.getDate("birth_date").toLocalDate());
+            m.setGender(Gender.valueOf(rs.getString("gender")));
+            m.setAddress(rs.getString("address"));
+            m.setProfession(rs.getString("profession"));
+            m.setPhoneNumber(rs.getString("phone_number"));
+            m.setEmail(rs.getString("email"));
+            m.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
+            m.setFederationJoiningDate(rs.getDate("federation_joining_date").toLocalDate());
+            members.add(m);
+        }
+        return members;
+    }
+}
 }
