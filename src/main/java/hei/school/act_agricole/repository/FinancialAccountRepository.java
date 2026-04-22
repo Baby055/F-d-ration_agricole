@@ -4,13 +4,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
+import hei.school.act_agricole.config.DataSource;
 import org.springframework.stereotype.Repository;
 
 import hei.school.act_agricole.entity.FinancialAccount;
 
-public class FinancialAccountRepository {
-    @Repository
+
+@Repository
 public class FinancialAccountRepository {
 
     public Optional<FinancialAccount> findById(String id) throws SQLException {
@@ -38,4 +40,4 @@ public class FinancialAccountRepository {
         }
     }
 }
-}
+
