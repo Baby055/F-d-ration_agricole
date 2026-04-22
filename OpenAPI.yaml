@@ -115,7 +115,7 @@ components:
         members:
           type: array
           items:
-            schema:
+          
               $ref: '#/components/schemas/MemberIdentifier'
         federationApproval:
           type: boolean
@@ -196,7 +196,7 @@ components:
         profession:
           type: string
         phoneNumber:
-          type: int
+          type: integer
         email:
           type: string
         occupation:

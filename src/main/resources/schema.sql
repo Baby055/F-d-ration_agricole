@@ -38,3 +38,6 @@ CREATE TABLE IF NOT EXISTS mandate (
     FOREIGN KEY (member_id) REFERENCES member(id),
     FOREIGN KEY (collectivity_id) REFERENCES collectivity(id)
     );
+
+ALTER TABLE collectivity ADD COLUMN unique_number VARCHAR(50) UNIQUE;
+ALTER TABLE collectivity ADD COLUMN unique_name VARCHAR(100) UNIQUE;
