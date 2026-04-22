@@ -24,7 +24,7 @@ public class CollectivityService {
     private final MembershipRepository membershipRepository = new MembershipRepository();
     private final MandateRepository mandateRepository = new MandateRepository();
 
-   public List<CollectivityResponse> createCollectivities(List<CreateCollectivityRequest> requests) {
+    public List<CollectivityResponse> createCollectivities(List<CreateCollectivityRequest> requests) {
         try {
             List<CollectivityResponse> responses = new ArrayList<>();
             for (CreateCollectivityRequest req : requests) {
@@ -81,12 +81,12 @@ public class CollectivityService {
             membershipRepository.save(membership);
         }
 
-        LocalDate mandateStart = today;
-        LocalDate mandateEnd = mandateStart.plusYears(1);
-        saveMandate(struct.getPresident(), collectivity.getId(), "PRESIDENT", mandateStart, mandateEnd);
-        saveMandate(struct.getVicePresident(), collectivity.getId(), "VICE_PRESIDENT", mandateStart, mandateEnd);
-        saveMandate(struct.getTreasurer(), collectivity.getId(), "TREASURER", mandateStart, mandateEnd);
-        saveMandate(struct.getSecretary(), collectivity.getId(), "SECRETARY", mandateStart, mandateEnd);
+        // Removed redundant variable mandateStart, use today directly
+        LocalDate mandateEnd = today.plusYears(1);
+        saveMandate(struct.getPresident(), collectivity.getId(), "PRESIDENT", today, mandateEnd);
+        saveMandate(struct.getVicePresident(), collectivity.getId(), "VICE_PRESIDENT", today, mandateEnd);
+        saveMandate(struct.getTreasurer(), collectivity.getId(), "TREASURER", today, mandateEnd);
+        saveMandate(struct.getSecretary(), collectivity.getId(), "SECRETARY", today, mandateEnd);
 
         Map<String, MemberResponse> memberResponseMap = members.stream()
                 .collect(Collectors.toMap(Member::getId, this::toMemberResponse));
@@ -180,5 +180,28 @@ public class CollectivityService {
         response.setNumber(coll.getNumber());
         response.setName(coll.getName());
         return response;
+    }
+
+    private CollectivityStructureResponse buildStructureFromMandates(List<Mandate> mandates, Map<String, MemberResponse> memberMap) {
+        CollectivityStructureResponse struct = new CollectivityStructureResponse();
+        for (Mandate mandate : mandates) {
+            MemberResponse member = memberMap.get(mandate.getMemberId());
+            if (member == null) continue;
+            switch (mandate.getRole()) {
+                case "PRESIDENT":
+                    struct.setPresident(member);
+                    break;
+                case "VICE_PRESIDENT":
+                    struct.setVicePresident(member);
+                    break;
+                case "TREASURER":
+                    struct.setTreasurer(member);
+                    break;
+                case "SECRETARY":
+                    struct.setSecretary(member);
+                    break;
+            }
+        }
+        return struct;
     }
 }
