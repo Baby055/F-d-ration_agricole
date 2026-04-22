@@ -7,6 +7,7 @@ import hei.school.act_agricole.dto.response.CollectivityStructureResponse;
 import hei.school.act_agricole.dto.response.MemberResponse;
 import hei.school.act_agricole.entity.*;
 import hei.school.act_agricole.exception.BadRequestException;
+import hei.school.act_agricole.exception.ConflictException;
 import hei.school.act_agricole.exception.NotFoundException;
 import hei.school.act_agricole.repository.*;
 import org.springframework.stereotype.Service;
@@ -36,12 +37,10 @@ public class CollectivityService {
     }
 
     private CollectivityResponse createOne(CreateCollectivityRequest req) throws SQLException {
-        // 1. Federation approval
         if (!req.isFederationApproval()) {
             throw new BadRequestException("Federation approval is required");
         }
 
-        // 2. Collect all member IDs (members list + structure)
         Set<String> allMemberIds = new HashSet<>(req.getMembers());
         CreateCollectivityStructureRequest struct = req.getStructure();
         allMemberIds.add(struct.getPresident());
@@ -49,13 +48,11 @@ public class CollectivityService {
         allMemberIds.add(struct.getTreasurer());
         allMemberIds.add(struct.getSecretary());
 
-        // 3. Fetch members
         List<Member> members = memberRepository.findByIds(new ArrayList<>(allMemberIds));
         if (members.size() != allMemberIds.size()) {
             throw new NotFoundException("One or more members not found");
         }
 
-        // 4. Seniority >= 6 months
         LocalDate sixMonthsAgo = LocalDate.now().minusMonths(6);
         for (Member m : members) {
             if (m.getFederationJoiningDate().isAfter(sixMonthsAgo)) {
@@ -63,19 +60,16 @@ public class CollectivityService {
             }
         }
 
-        // 5. Minimum 10 members
         if (allMemberIds.size() < 10) {
             throw new BadRequestException("At least 10 members required");
         }
 
-        // 6. Create collectivity
         Collectivity collectivity = new Collectivity();
         collectivity.setId(UUID.randomUUID().toString());
         collectivity.setLocation(req.getLocation());
         collectivity.setFederationApproval(true);
         collectivityRepository.save(collectivity);
 
-        // 7. Register memberships
         LocalDate today = LocalDate.now();
         for (String memberId : allMemberIds) {
             Membership membership = new Membership();
@@ -87,7 +81,6 @@ public class CollectivityService {
             membershipRepository.save(membership);
         }
 
-        // 8. Register mandates (1 year)
         LocalDate mandateStart = today;
         LocalDate mandateEnd = mandateStart.plusYears(1);
         saveMandate(struct.getPresident(), collectivity.getId(), "PRESIDENT", mandateStart, mandateEnd);
@@ -95,7 +88,6 @@ public class CollectivityService {
         saveMandate(struct.getTreasurer(), collectivity.getId(), "TREASURER", mandateStart, mandateEnd);
         saveMandate(struct.getSecretary(), collectivity.getId(), "SECRETARY", mandateStart, mandateEnd);
 
-        // 9. Build response
         Map<String, MemberResponse> memberResponseMap = members.stream()
                 .collect(Collectors.toMap(Member::getId, this::toMemberResponse));
 
@@ -138,5 +130,55 @@ public class CollectivityService {
         r.setOccupation(m.getOccupation().name());
         r.setReferees(List.of()); // empty for collectivity members
         return r;
+    }
+
+    public CollectivityResponse assignIdentification(String collectivityId, String number, String name) {
+        try {
+            Optional<Collectivity> opt = collectivityRepository.findById(collectivityId);
+            if (opt.isEmpty()) {
+                throw new NotFoundException("Collectivity not found: " + collectivityId);
+            }
+            Collectivity existing = opt.get();
+
+            if (existing.getNumber() != null || existing.getName() != null) {
+                throw new ConflictException("Collectivity already has a number or name assigned and cannot be changed");
+            }
+
+            if (collectivityRepository.existsByNumber(number)) {
+                throw new BadRequestException("Number already used by another collectivity");
+            }
+            if (collectivityRepository.existsByName(name)) {
+                throw new BadRequestException("Name already used by another collectivity");
+            }
+
+            collectivityRepository.updateNumberAndName(collectivityId, number, name);
+
+            return getCollectivityWithDetails(collectivityId);
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error", e);
+        }
+    }
+
+    private CollectivityResponse getCollectivityWithDetails(String collectivityId) throws SQLException {
+        Optional<Collectivity> opt = collectivityRepository.findById(collectivityId);
+        if (opt.isEmpty()) throw new NotFoundException("Collectivity not found");
+        Collectivity coll = opt.get();
+
+        List<Member> members = membershipRepository.findMembersByCollectivityId(collectivityId);
+        Map<String, MemberResponse> memberMap = members.stream()
+                .collect(Collectors.toMap(Member::getId, this::toMemberResponse));
+
+        List<Mandate> mandates = mandateRepository.findByCollectivityId(collectivityId);
+        CollectivityStructureResponse structResp = buildStructureFromMandates(mandates, memberMap);
+
+        CollectivityResponse response = new CollectivityResponse();
+        response.setId(coll.getId());
+        response.setLocation(coll.getLocation());
+        response.setStructure(structResp);
+        response.setMembers(new ArrayList<>(memberMap.values()));
+        response.setNumber(coll.getNumber());
+        response.setName(coll.getName());
+        return response;
     }
 }
