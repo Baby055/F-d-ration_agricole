@@ -215,7 +215,7 @@ public class CollectivityService {
 
 public List<FinancialAccount> getFinancialAccounts(String collectivityId, LocalDate atDate) {
     try {
-        if (collectivityRepo.findById(collectivityId).isEmpty())
+        if (CollectivityRepository.findById(collectivityId).isEmpty())
             throw new NotFoundException("Collectivity not found");
         List<FinancialAccount> accounts = accountRepo.findByCollectivityId(collectivityId);
         for (FinancialAccount acc : accounts) {

@@ -93,3 +93,6 @@ CREATE TABLE IF NOT EXISTS financial_account (
     account_number VARCHAR(11),
     rib_key VARCHAR(2)
     );
+
+ALTER TABLE financial_account ADD COLUMN collectivity_id VARCHAR(36);
+ALTER TABLE financial_account ADD FOREIGN KEY (collectivity_id) REFERENCES collectivity(id);
