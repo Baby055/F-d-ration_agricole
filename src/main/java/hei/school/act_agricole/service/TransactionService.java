@@ -1,5 +1,6 @@
 package hei.school.act_agricole.service;
 
+import hei.school.act_agricole.dto.request.CreateMemberPaymentRequest;
 import hei.school.act_agricole.dto.response.CollectivityTransactionResponse;
 import hei.school.act_agricole.dto.response.MemberPaymentResponse;
 import hei.school.act_agricole.dto.response.MemberResponse;
@@ -14,7 +15,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,6 +27,7 @@ public class TransactionService {
     private final MemberRepository memberRepo = new MemberRepository();
     private final CollectivityRepository collectivityRepo = new CollectivityRepository();
     private final FinancialAccountRepository accountRepo = new FinancialAccountRepository();
+    private final MembershipRepository membershipRepo = new MembershipRepository();
 
     // GET /collectivities/{id}/transactions
     public List<CollectivityTransactionResponse> getTransactions(String collectivityId, LocalDate from, LocalDate to) {
@@ -36,32 +37,34 @@ public class TransactionService {
             List<CollectivityTransaction> transactions = transactionRepo.findByCollectivityIdAndDateRange(collectivityId, from, to);
             return transactions.stream().map(this::toTransactionResponse).collect(Collectors.toList());
         } catch (SQLException e) {
-            throw new RuntimeException("DB error", e);
+            throw new RuntimeException("Database error", e);
         }
     }
 
     // POST /members/{id}/payments
-    public List<MemberPaymentResponse> createPayments(String memberId, List<CreateMemberPayment> requests) {
+    public List<MemberPaymentResponse> createPayments(String memberId, List<CreateMemberPaymentRequest> requests) {
         try {
-            // Vérifier que le membre existe
+            // Check member exists
             if (memberRepo.findById(memberId).isEmpty())
                 throw new NotFoundException("Member not found");
-            // Récupérer la collectivité du membre (via membership actuel)
-            String collectivityId = getCurrentCollectivityId(memberId)
+
+            // Get current collectivity of the member
+            String collectivityId = membershipRepo.findCurrentCollectivityId(memberId)
                     .orElseThrow(() -> new BadRequestException("Member not attached to any collectivity"));
 
             List<MemberPaymentResponse> responses = new ArrayList<>();
-            for (CreateMemberPayment req : requests) {
-                // Vérifier que le frais existe et est actif
+            for (CreateMemberPaymentRequest req : requests) {
+                // Check membership fee exists and is active
                 MembershipFee fee = feeRepo.findById(req.getMembershipFeeIdentifier())
                         .orElseThrow(() -> new NotFoundException("Membership fee not found"));
                 if (fee.getStatus() != ActivityStatus.ACTIVE)
                     throw new BadRequestException("Membership fee is not active");
-                // Vérifier que le compte crédité existe
+
+                // Check credited account exists
                 FinancialAccount account = accountRepo.findById(req.getAccountCreditedIdentifier())
                         .orElseThrow(() -> new NotFoundException("Financial account not found"));
 
-                // Créer la transaction
+                // Create transaction
                 CollectivityTransaction transaction = new CollectivityTransaction();
                 transaction.setId(UUID.randomUUID().toString());
                 transaction.setCollectivityId(collectivityId);
@@ -72,7 +75,7 @@ public class TransactionService {
                 transaction.setMemberDebitedId(memberId);
                 transactionRepo.save(transaction);
 
-                // Créer le paiement membre
+                // Create member payment
                 MemberPayment payment = new MemberPayment();
                 payment.setId(UUID.randomUUID().toString());
                 payment.setMemberId(memberId);
@@ -87,15 +90,8 @@ public class TransactionService {
             }
             return responses;
         } catch (SQLException e) {
-            throw new RuntimeException("DB error", e);
+            throw new RuntimeException("Database error", e);
         }
-    }
-
-    private Optional<String> getCurrentCollectivityId(String memberId) throws SQLException {
-        // À implémenter dans MembershipRepository
-        // SELECT collectivity_id FROM membership WHERE member_id = ? AND end_date IS NULL
-        // On suppose que MembershipRepository a une méthode findCurrentCollectivityId
-        return new MembershipRepository().findCurrentCollectivityId(memberId);
     }
 
     private CollectivityTransactionResponse toTransactionResponse(CollectivityTransaction t) {
@@ -111,7 +107,9 @@ public class TransactionService {
             r.setAccountCredited(account);
             r.setMemberDebited(memberResp);
             return r;
-        } catch (SQLException e) { throw new RuntimeException(e); }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private MemberPaymentResponse toPaymentResponse(MemberPayment p, FinancialAccount account) {
@@ -129,7 +127,14 @@ public class TransactionService {
         r.setId(m.getId());
         r.setFirstName(m.getFirstName());
         r.setLastName(m.getLastName());
-        // ... autres champs
+        r.setBirthDate(m.getBirthDate());
+        r.setGender(m.getGender().name());
+        r.setAddress(m.getAddress());
+        r.setProfession(m.getProfession());
+        r.setPhoneNumber(m.getPhoneNumber());
+        r.setEmail(m.getEmail());
+        r.setOccupation(m.getOccupation().name());
+        r.setReferees(List.of()); // avoid recursion
         return r;
     }
 }
