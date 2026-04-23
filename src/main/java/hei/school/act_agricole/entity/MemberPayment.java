@@ -1,5 +1,7 @@
 package hei.school.act_agricole.entity;
 
+import hei.school.act_agricole.enums.PaymentMode;
+
 import java.time.LocalDate;
 
 public class MemberPayment {

@@ -13,7 +13,6 @@ public class CollectivityTransactionResponse {
     private FinancialAccount accountCredited;
     private MemberResponse memberDebited;
 
-    // Getters and setters
     public String getId() {
         return id;
     }
