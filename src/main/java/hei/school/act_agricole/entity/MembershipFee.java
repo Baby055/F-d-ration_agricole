@@ -1,5 +1,8 @@
 package hei.school.act_agricole.entity;
 
+import hei.school.act_agricole.enums.ActivityStatus;
+import hei.school.act_agricole.enums.Frequency;
+
 import java.time.LocalDate;
 
 public class MembershipFee {

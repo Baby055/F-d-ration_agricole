@@ -12,6 +12,7 @@ public class FinancialAccount {
     private String branchCode;
     private String accountNumber;
     private String ribKey;
+    private String collectivityId;
 
     public String getId() {
         return id;
@@ -99,5 +100,13 @@ public class FinancialAccount {
 
     public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
+    }
+
+    public String getCollectivityId() {
+        return collectivityId;
+    }
+
+    public void setCollectivityId(String collectivityId) {
+        this.collectivityId = collectivityId;
     }
 }
