@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS member (
     address VARCHAR(255),
     profession VARCHAR(100),
     phone_number VARCHAR(20),
-    email VARCHAR(100) UNIQUE,
+    email VARCHAR(100) ,
     occupation VARCHAR(20) NOT NULL,
     federation_joining_date DATE NOT NULL
     );
