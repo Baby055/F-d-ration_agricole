@@ -1,4 +1,4 @@
--- Table member (sans contrainte UNIQUE sur email)
+-- Table member
 CREATE TABLE IF NOT EXISTS member (
                                       id VARCHAR(36) PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -8,21 +8,23 @@ CREATE TABLE IF NOT EXISTS member (
     address VARCHAR(255),
     profession VARCHAR(100),
     phone_number VARCHAR(20),
-    email VARCHAR(100),
+    email VARCHAR(100) ,
     occupation VARCHAR(20) NOT NULL,
     federation_joining_date DATE NOT NULL
     );
 
--- Table collectivity (inclut unique_number et unique_name)
+-- Table collectivity (sans number/name pour l'instant)
 CREATE TABLE IF NOT EXISTS collectivity (
                                             id VARCHAR(36) PRIMARY KEY,
     location VARCHAR(255) NOT NULL,
-    federation_approval BOOLEAN NOT NULL,
-    unique_number VARCHAR(50) UNIQUE,
-    unique_name VARCHAR(100) UNIQUE
+    federation_approval BOOLEAN NOT NULL
     );
 
--- Table membership
+-- Ajout des colonnes number et name
+ALTER TABLE collectivity ADD COLUMN IF NOT EXISTS unique_number VARCHAR(50) UNIQUE;
+ALTER TABLE collectivity ADD COLUMN IF NOT EXISTS unique_name VARCHAR(100) UNIQUE;
+
+-- Table membership (appartenance)
 CREATE TABLE IF NOT EXISTS membership (
                                           id VARCHAR(36) PRIMARY KEY,
     member_id VARCHAR(36) NOT NULL,
@@ -50,8 +52,8 @@ CREATE TABLE IF NOT EXISTS membership_fee (
                                               id VARCHAR(36) PRIMARY KEY,
     collectivity_id VARCHAR(36) NOT NULL,
     eligible_from DATE NOT NULL,
-    frequency VARCHAR(20) NOT NULL,
-    amount NUMERIC(15,2) NOT NULL,
+    frequency VARCHAR(20) NOT NULL, -- WEEKLY, MONTHLY, ANNUALLY, PUNCTUALLY
+    amount DECIMAL(15,2) NOT NULL,
     label VARCHAR(255),
     status VARCHAR(20) DEFAULT 'ACTIVE',
     FOREIGN KEY (collectivity_id) REFERENCES collectivity(id)
@@ -62,8 +64,8 @@ CREATE TABLE IF NOT EXISTS collectivity_transaction (
                                                         id VARCHAR(36) PRIMARY KEY,
     collectivity_id VARCHAR(36) NOT NULL,
     creation_date DATE NOT NULL,
-    amount NUMERIC(15,2) NOT NULL,
-    payment_mode VARCHAR(20) NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    payment_mode VARCHAR(20) NOT NULL, -- CASH, MOBILE_BANKING, BANK_TRANSFER
     account_credited_id VARCHAR(36) NOT NULL,
     member_debited_id VARCHAR(36) NOT NULL,
     FOREIGN KEY (collectivity_id) REFERENCES collectivity(id),
@@ -75,7 +77,7 @@ CREATE TABLE IF NOT EXISTS member_payment (
                                               id VARCHAR(36) PRIMARY KEY,
     member_id VARCHAR(36) NOT NULL,
     membership_fee_id VARCHAR(36) NOT NULL,
-    amount NUMERIC(15,2) NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
     payment_mode VARCHAR(20) NOT NULL,
     transaction_id VARCHAR(36) NOT NULL,
     creation_date DATE NOT NULL,
@@ -84,13 +86,13 @@ CREATE TABLE IF NOT EXISTS member_payment (
     FOREIGN KEY (transaction_id) REFERENCES collectivity_transaction(id)
     );
 
--- Table financial_account (inclut collectivity_id directement)
+-- Table financial_account
 CREATE TABLE IF NOT EXISTS financial_account (
                                                  id VARCHAR(36) PRIMARY KEY,
     collectivity_id VARCHAR(36),
-    account_type VARCHAR(20) NOT NULL,
+    account_type VARCHAR(20) NOT NULL, -- CASH, MOBILE_BANKING, BANK_ACCOUNT
     holder_name VARCHAR(255),
-    amount NUMERIC(15,2) DEFAULT 0,
+    amount DECIMAL(15,2) DEFAULT 0,
     mobile_service VARCHAR(20),
     mobile_number VARCHAR(20),
     bank_name VARCHAR(50),
