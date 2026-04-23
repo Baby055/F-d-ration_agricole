@@ -13,7 +13,6 @@ import hei.school.act_agricole.entity.Collectivity;
 
     @Repository
 public class CollectivityRepository {
-
     public void save(Collectivity collectivity) throws SQLException {
         String sql = "INSERT INTO collectivity (id, location, federation_approval) VALUES (?,?,?)";
         try (Connection conn = DataSource.getConnection();
