@@ -23,6 +23,7 @@ public class CollectivityService {
     private final CollectivityRepository collectivityRepository = new CollectivityRepository();
     private final MembershipRepository membershipRepository = new MembershipRepository();
     private final MandateRepository mandateRepository = new MandateRepository();
+    private final FinancialAccountRepository accountRepo = new FinancialAccountRepository(); // AJOUT
 
     public List<CollectivityResponse> createCollectivities(List<CreateCollectivityRequest> requests) {
         try {
@@ -81,7 +82,6 @@ public class CollectivityService {
             membershipRepository.save(membership);
         }
 
-        // Removed redundant variable mandateStart, use today directly
         LocalDate mandateEnd = today.plusYears(1);
         saveMandate(struct.getPresident(), collectivity.getId(), "PRESIDENT", today, mandateEnd);
         saveMandate(struct.getVicePresident(), collectivity.getId(), "VICE_PRESIDENT", today, mandateEnd);
@@ -128,7 +128,7 @@ public class CollectivityService {
         r.setPhoneNumber(m.getPhoneNumber());
         r.setEmail(m.getEmail());
         r.setOccupation(m.getOccupation().name());
-        r.setReferees(List.of()); // empty for collectivity members
+        r.setReferees(List.of());
         return r;
     }
 
@@ -206,25 +206,25 @@ public class CollectivityService {
     }
 
     public CollectivityResponse getCollectivityById(String id) {
-    try {
-        return getCollectivityWithDetails(id);
-    } catch (SQLException e) {
-        throw new RuntimeException("Database error", e);
-    }
-}
-
-public List<FinancialAccount> getFinancialAccounts(String collectivityId, LocalDate atDate) {
-    try {
-        if (CollectivityRepository.findById(collectivityId).isEmpty())
-            throw new NotFoundException("Collectivity not found");
-        List<FinancialAccount> accounts = accountRepo.findByCollectivityId(collectivityId);
-        for (FinancialAccount acc : accounts) {
-            double balance = accountRepo.getBalanceAtDate(acc.getId(), atDate);
-            acc.setAmount(balance); // on remplace le solde actuel par le solde à la date demandée
+        try {
+            return getCollectivityWithDetails(id);
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error", e);
         }
-        return accounts;
-    } catch (SQLException e) {
-        throw new RuntimeException("Database error", e);
     }
-}
+
+    public List<FinancialAccount> getFinancialAccounts(String collectivityId, LocalDate atDate) {
+        try {
+            if (collectivityRepository.findById(collectivityId).isEmpty())
+                throw new NotFoundException("Collectivity not found");
+            List<FinancialAccount> accounts = accountRepo.findByCollectivityId(collectivityId);
+            for (FinancialAccount acc : accounts) {
+                double balance = accountRepo.getBalanceAtDate(acc.getId(), atDate);
+                acc.setAmount(balance);
+            }
+            return accounts;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error", e);
+        }
+    }
 }

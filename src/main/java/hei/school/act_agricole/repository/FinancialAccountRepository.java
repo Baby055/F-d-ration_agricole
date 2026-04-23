@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 
 import hei.school.act_agricole.entity.FinancialAccount;
 
-import static sun.awt.image.MultiResolutionCachedImage.map;
 
 
 @Repository
