@@ -204,4 +204,27 @@ public class CollectivityService {
         }
         return struct;
     }
+
+    public CollectivityResponse getCollectivityById(String id) {
+    try {
+        return getCollectivityWithDetails(id);
+    } catch (SQLException e) {
+        throw new RuntimeException("Database error", e);
+    }
+}
+
+public List<FinancialAccount> getFinancialAccounts(String collectivityId, LocalDate atDate) {
+    try {
+        if (collectivityRepo.findById(collectivityId).isEmpty())
+            throw new NotFoundException("Collectivity not found");
+        List<FinancialAccount> accounts = accountRepo.findByCollectivityId(collectivityId);
+        for (FinancialAccount acc : accounts) {
+            double balance = accountRepo.getBalanceAtDate(acc.getId(), atDate);
+            acc.setAmount(balance); // on remplace le solde actuel par le solde à la date demandée
+        }
+        return accounts;
+    } catch (SQLException e) {
+        throw new RuntimeException("Database error", e);
+    }
+}
 }
