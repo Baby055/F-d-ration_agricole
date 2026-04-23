@@ -57,8 +57,7 @@ public class TransactionService {
                 // Check membership fee exists and is active
                 MembershipFee fee = feeRepo.findById(req.getMembershipFeeIdentifier())
                         .orElseThrow(() -> new NotFoundException("Membership fee not found"));
-                // Correction : utilisation de equals() pour comparer les enums
-                if (!ActivityStatus.ACTIVE.equals(fee.getStatus()))
+                if (fee.getStatus() != ActivityStatus.ACTIVE)
                     throw new BadRequestException("Membership fee is not active");
 
                 // Check credited account exists

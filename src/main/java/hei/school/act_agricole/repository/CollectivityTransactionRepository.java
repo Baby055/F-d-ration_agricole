@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+    @Repository
 public class CollectivityTransactionRepository {
 
     public void save(CollectivityTransaction transaction) throws SQLException {
@@ -52,3 +52,4 @@ public class CollectivityTransactionRepository {
         }
     }
 }
+
