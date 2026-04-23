@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import hei.school.act_agricole.dto.request.CreateMembershipFeeRequest;  // ← correction
+import hei.school.act_agricole.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import hei.school.act_agricole.dto.response.MembershipFeeResponse;
@@ -15,8 +17,7 @@ import hei.school.act_agricole.exception.NotFoundException;
 import hei.school.act_agricole.repository.CollectivityRepository;
 import hei.school.act_agricole.repository.MembershipFeeRepository;
 
-public class MembershipFeeService {
-    @Service
+@Service
 public class MembershipFeeService {
 
     private final MembershipFeeRepository feeRepo = new MembershipFeeRepository();
@@ -33,12 +34,12 @@ public class MembershipFeeService {
         }
     }
 
-    public List<MembershipFeeResponse> createMembershipFees(String collectivityId, List<CreateMembershipFee> requests) {
+    public List<MembershipFeeResponse> createMembershipFees(String collectivityId, List<CreateMembershipFeeRequest> requests) {
         try {
             if (collectivityRepo.findById(collectivityId).isEmpty())
                 throw new NotFoundException("Collectivity not found");
             List<MembershipFeeResponse> responses = new ArrayList<>();
-            for (CreateMembershipFee req : requests) {
+            for (CreateMembershipFeeRequest req : requests) {  // ← correction
                 if (req.getAmount() < 0) throw new BadRequestException("Amount cannot be negative");
                 MembershipFee fee = new MembershipFee();
                 fee.setId(UUID.randomUUID().toString());
@@ -67,5 +68,4 @@ public class MembershipFeeService {
         r.setStatus(fee.getStatus());
         return r;
     }
-}
 }

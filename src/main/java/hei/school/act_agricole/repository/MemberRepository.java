@@ -72,4 +72,15 @@ public class MemberRepository {
         m.setFederationJoiningDate(rs.getDate("federation_joining_date").toLocalDate());
         return m;
     }
+
+    public Optional<String> findCurrentCollectivityId(String memberId) throws SQLException {
+        String sql = "SELECT collectivity_id FROM membership WHERE member_id = ? AND end_date IS NULL";
+        try (Connection conn = DataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, memberId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return Optional.of(rs.getString("collectivity_id"));
+            return Optional.empty();
+        }
+    }
 }

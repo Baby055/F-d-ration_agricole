@@ -27,7 +27,7 @@ public class MembershipFeeController {
     public ResponseEntity<List<MembershipFeeResponse>> createMembershipFees(
             @PathVariable String id,
             @RequestBody List<CreateMembershipFeeRequest> requests) {
-        List<MembershipFeeResponse> responses = service.createMemberships(id, requests);
+        List<MembershipFeeResponse> responses = service.createMembershipFees(id, requests);
         return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
 }
