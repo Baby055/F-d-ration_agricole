@@ -5,6 +5,7 @@ DELETE FROM membership_fee;
 DELETE FROM mandate;
 DELETE FROM membership;
 DELETE FROM financial_account;
+DELETE FROM member_referee;    -- AJOUT OBLIGATOIRE
 DELETE FROM member;
 DELETE FROM collectivity;
 
