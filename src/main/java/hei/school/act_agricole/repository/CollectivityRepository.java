@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -72,4 +74,23 @@ public class CollectivityRepository {
                 if (updated == 0) throw new SQLException("Collectivity not found");
             }
         }
+
+        public List<Collectivity> findAll() throws SQLException {
+    String sql = "SELECT id, location, federation_approval, unique_number, unique_name FROM collectivity";
+    try (Connection conn = DataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        ResultSet rs = stmt.executeQuery();
+        List<Collectivity> list = new ArrayList<>();
+        while (rs.next()) {
+            Collectivity c = new Collectivity();
+            c.setId(rs.getString("id"));
+            c.setLocation(rs.getString("location"));
+            c.setFederationApproval(rs.getBoolean("federation_approval"));
+            c.setNumber(rs.getString("unique_number"));
+            c.setName(rs.getString("unique_name"));
+            list.add(c);
+        }
+        return list;
+    }
+}
 }
