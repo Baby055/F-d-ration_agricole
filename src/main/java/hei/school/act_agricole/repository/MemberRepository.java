@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 
 @Repository
@@ -83,4 +84,16 @@ public class MemberRepository {
             return Optional.empty();
         }
     }
+
+    public double getTotalActiveFeesAmountForCollectivity(String collectivityId, LocalDate upToDate) throws SQLException {
+    String sql = "SELECT COALESCE(SUM(amount), 0) FROM membership_fee WHERE collectivity_id = ? AND status = 'ACTIVE' AND eligible_from <= ?";
+    try (Connection conn = DataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, collectivityId);
+        stmt.setDate(2, Date.valueOf(upToDate));
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) return rs.getDouble(1);
+        return 0;
+    }
+}
 }
