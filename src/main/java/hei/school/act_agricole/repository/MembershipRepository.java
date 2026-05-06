@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -70,6 +71,48 @@ public class MembershipRepository {
             members.add(m);
         }
         return members;
+    }
+}
+    public List<Member> findActiveMembersWithPaymentsByCollectivityId(String collectivityId, LocalDate from, LocalDate to) throws SQLException {
+    
+    String sql = 
+        "SELECT m.id, m.first_name, m.last_name, m.email, m.occupation, COALESCE(SUM(mp.amount), 0) AS total_paid " +
+        "FROM member m " +
+        "JOIN membership ms ON m.id = ms.member_id " +
+        "LEFT JOIN member_payment mp ON m.id = mp.member_id AND mp.creation_date BETWEEN ? AND ? " +
+        "WHERE ms.collectivity_id = ? AND ms.start_date <= ? AND (ms.end_date IS NULL OR ms.end_date >= ?) " +
+        "GROUP BY m.id";
+    try (Connection conn = DataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setDate(1, Date.valueOf(from));
+        stmt.setDate(2, Date.valueOf(to));
+        stmt.setString(3, collectivityId);
+        stmt.setDate(4, Date.valueOf(to));
+        stmt.setDate(5, Date.valueOf(from));
+        ResultSet rs = stmt.executeQuery();
+        List<Member> members = new ArrayList<>();
+        while (rs.next()) {
+            Member m = new Member();
+            m.setId(rs.getString("id"));
+            m.setFirstName(rs.getString("first_name"));
+            m.setLastName(rs.getString("last_name"));
+            m.setEmail(rs.getString("email"));
+            m.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
+            members.add(m);
+        }
+        return members;
+    }
+}
+    public int countNewMembersByCollectivityId(String collectivityId, LocalDate from, LocalDate to) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM membership WHERE collectivity_id = ? AND start_date BETWEEN ? AND ?";
+    try (Connection conn = DataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, collectivityId);
+        stmt.setDate(2, Date.valueOf(from));
+        stmt.setDate(3, Date.valueOf(to));
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) return rs.getInt(1);
+        return 0;
     }
 }
 }
