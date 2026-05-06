@@ -47,72 +47,74 @@ public class MembershipRepository {
     }
 
     public List<Member> findMembersByCollectivityId(String collectivityId) throws SQLException {
-    String sql = "SELECT m.* FROM member m " +
-                 "JOIN membership ms ON m.id = ms.member_id " +
-                 "WHERE ms.collectivity_id = ? AND ms.end_date IS NULL";
-    try (Connection conn = DataSource.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setString(1, collectivityId);
-        ResultSet rs = stmt.executeQuery();
-        List<Member> members = new ArrayList<>();
-        while (rs.next()) {
-            Member m = new Member();
-            m.setId(rs.getString("id"));
-            m.setFirstName(rs.getString("first_name"));
-            m.setLastName(rs.getString("last_name"));
-            m.setBirthDate(rs.getDate("birth_date").toLocalDate());
-            m.setGender(Gender.valueOf(rs.getString("gender")));
-            m.setAddress(rs.getString("address"));
-            m.setProfession(rs.getString("profession"));
-            m.setPhoneNumber(rs.getString("phone_number"));
-            m.setEmail(rs.getString("email"));
-            m.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
-            m.setFederationJoiningDate(rs.getDate("federation_joining_date").toLocalDate());
-            members.add(m);
+        String sql = "SELECT m.* FROM member m " +
+                     "JOIN membership ms ON m.id = ms.member_id " +
+                     "WHERE ms.collectivity_id = ? AND ms.end_date IS NULL";
+        try (Connection conn = DataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, collectivityId);
+            ResultSet rs = stmt.executeQuery();
+            List<Member> members = new ArrayList<>();
+            while (rs.next()) {
+                Member m = new Member();
+                m.setId(rs.getString("id"));
+                m.setFirstName(rs.getString("first_name"));
+                m.setLastName(rs.getString("last_name"));
+                m.setBirthDate(rs.getDate("birth_date").toLocalDate());
+                m.setGender(Gender.valueOf(rs.getString("gender")));
+                m.setAddress(rs.getString("address"));
+                m.setProfession(rs.getString("profession"));
+                m.setPhoneNumber(rs.getString("phone_number"));
+                m.setEmail(rs.getString("email"));
+                m.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
+                m.setFederationJoiningDate(rs.getDate("federation_joining_date").toLocalDate());
+                members.add(m);
+            }
+            return members;
         }
-        return members;
     }
-}
+
     public List<Member> findActiveMembersWithPaymentsByCollectivityId(String collectivityId, LocalDate from, LocalDate to) throws SQLException {
-    
-    String sql = 
-        "SELECT m.id, m.first_name, m.last_name, m.email, m.occupation, COALESCE(SUM(mp.amount), 0) AS total_paid " +
-        "FROM member m " +
-        "JOIN membership ms ON m.id = ms.member_id " +
-        "LEFT JOIN member_payment mp ON m.id = mp.member_id AND mp.creation_date BETWEEN ? AND ? " +
-        "WHERE ms.collectivity_id = ? AND ms.start_date <= ? AND (ms.end_date IS NULL OR ms.end_date >= ?) " +
-        "GROUP BY m.id";
-    try (Connection conn = DataSource.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setDate(1, Date.valueOf(from));
-        stmt.setDate(2, Date.valueOf(to));
-        stmt.setString(3, collectivityId);
-        stmt.setDate(4, Date.valueOf(to));
-        stmt.setDate(5, Date.valueOf(from));
-        ResultSet rs = stmt.executeQuery();
-        List<Member> members = new ArrayList<>();
-        while (rs.next()) {
-            Member m = new Member();
-            m.setId(rs.getString("id"));
-            m.setFirstName(rs.getString("first_name"));
-            m.setLastName(rs.getString("last_name"));
-            m.setEmail(rs.getString("email"));
-            m.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
-            members.add(m);
+        String sql =
+                "SELECT m.id, m.first_name, m.last_name, m.email, m.occupation, COALESCE(SUM(mp.amount), 0) AS total_paid " +
+                        "FROM member m " +
+                        "JOIN membership ms ON m.id = ms.member_id " +
+                        "LEFT JOIN member_payment mp ON m.id = mp.member_id AND mp.creation_date BETWEEN ? AND ? " +
+                        "WHERE ms.collectivity_id = ? AND ms.start_date <= ? AND (ms.end_date IS NULL OR ms.end_date >= ?) " +
+                        "GROUP BY m.id";
+        try (Connection conn = DataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDate(1, Date.valueOf(from));
+            stmt.setDate(2, Date.valueOf(to));
+            stmt.setString(3, collectivityId);
+            stmt.setDate(4, Date.valueOf(to));
+            stmt.setDate(5, Date.valueOf(from));
+            ResultSet rs = stmt.executeQuery();
+            List<Member> members = new ArrayList<>();
+            while (rs.next()) {
+                Member m = new Member();
+                m.setId(rs.getString("id"));
+                m.setFirstName(rs.getString("first_name"));
+                m.setLastName(rs.getString("last_name"));
+                m.setEmail(rs.getString("email"));
+                m.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
+                // On ne stocke pas le total_paid ici, mais on peut l'ajouter dans un attribut temporaire si besoin
+                members.add(m);
+            }
+            return members;
         }
-        return members;
     }
-}
+
     public int countNewMembersByCollectivityId(String collectivityId, LocalDate from, LocalDate to) throws SQLException {
-    String sql = "SELECT COUNT(*) FROM membership WHERE collectivity_id = ? AND start_date BETWEEN ? AND ?";
-    try (Connection conn = DataSource.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setString(1, collectivityId);
-        stmt.setDate(2, Date.valueOf(from));
-        stmt.setDate(3, Date.valueOf(to));
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) return rs.getInt(1);
-        return 0;
+        String sql = "SELECT COUNT(*) FROM membership WHERE collectivity_id = ? AND start_date BETWEEN ? AND ?";
+        try (Connection conn = DataSource.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, collectivityId);
+            stmt.setDate(2, Date.valueOf(from));
+            stmt.setDate(3, Date.valueOf(to));
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+            return 0;
+        }
     }
-}
 }
