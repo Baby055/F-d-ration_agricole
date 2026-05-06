@@ -65,7 +65,6 @@ public class StatisticsService {
         return desc;
     }
 
-    // GET /collectivites/statistics
     public List<CollectivityOverallStatisticsResponse> getOverallStatistics(LocalDate from, LocalDate to) {
         try {
             List<Collectivity> collectivities = collectivityRepo.findAll();
@@ -81,7 +80,6 @@ public class StatisticsService {
                 double percentage = activeMembers.isEmpty() ? 0 : (upToDateCount * 100.0 / activeMembers.size());
                 int newMembers = membershipRepo.countNewMembersByCollectivityId(coll.getId(), from, to);
 
-                // Utilisation de CollectivityInformationResponse
                 CollectivityInformationResponse info = new CollectivityInformationResponse();
                 info.setName(coll.getName() != null ? coll.getName() : "");
                 int num = 0;
