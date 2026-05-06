@@ -4,10 +4,8 @@ import hei.school.act_agricole.config.DataSource;
 import hei.school.act_agricole.entity.MemberPayment;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDate;
 
 @Repository
 public class MemberPaymentRepository {
@@ -23,6 +21,19 @@ public class MemberPaymentRepository {
             stmt.setString(6, payment.getTransactionId());
             stmt.setDate(7, Date.valueOf(payment.getCreationDate()));
             stmt.executeUpdate();
+        }
+    }
+
+    public double getTotalPaidByMemberAndPeriod(String memberId, LocalDate from, LocalDate to) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(amount), 0) FROM member_payment WHERE member_id = ? AND creation_date BETWEEN ? AND ?";
+        try (Connection conn = DataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, memberId);
+            stmt.setDate(2, Date.valueOf(from));
+            stmt.setDate(3, Date.valueOf(to));
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getDouble(1);
+            return 0;
         }
     }
 }
