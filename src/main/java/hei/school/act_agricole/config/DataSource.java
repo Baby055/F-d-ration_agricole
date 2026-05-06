@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DataSource {
-    private static final String URL = "jdbc:h2:mem:federationdb;DB_CLOSE_DELAY=-1";
-    private static final String USER = "sa";
-    private static final String PASSWORD = "";
+    private static final String URL = "jdbc:postgresql://localhost:5432/agricultural_federation_api";
+    private static final String USER = "postgres";
+    private static final String PASSWORD = "meilleur";
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
