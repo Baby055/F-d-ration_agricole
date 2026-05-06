@@ -7,6 +7,7 @@ import hei.school.act_agricole.enums.Frequency;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,5 +63,17 @@ public class MembershipFeeRepository {
         f.setLabel(rs.getString("label"));
         f.setStatus(ActivityStatus.valueOf(rs.getString("status")));
         return f;
+    }
+
+    public double getTotalActiveFeesAmountForCollectivity(String collectivityId, LocalDate upToDate) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(amount), 0) FROM membership_fee WHERE collectivity_id = ? AND status = 'ACTIVE' AND eligible_from <= ?";
+        try (Connection conn = DataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, collectivityId);
+            stmt.setDate(2, Date.valueOf(upToDate));
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getDouble(1);
+            return 0;
+        }
     }
 }
