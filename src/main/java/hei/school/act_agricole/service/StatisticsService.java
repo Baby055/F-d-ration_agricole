@@ -5,6 +5,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import hei.school.act_agricole.dto.response.MemberDescriptionResponse;
+import hei.school.act_agricole.dto.response.CollectivityInformationResponse;
+import hei.school.act_agricole.entity.Member;
 import org.springframework.stereotype.Service;
 
 import hei.school.act_agricole.dto.response.CollectivityLocalStatisticsResponse;
@@ -16,15 +19,13 @@ import hei.school.act_agricole.repository.MemberPaymentRepository;
 import hei.school.act_agricole.repository.MembershipFeeRepository;
 import hei.school.act_agricole.repository.MembershipRepository;
 
-public class StatisticsService {
-    @Service
+@Service
 public class StatisticsService {
 
     private final CollectivityRepository collectivityRepo = new CollectivityRepository();
     private final MembershipFeeRepository feeRepo = new MembershipFeeRepository();
     private final MembershipRepository membershipRepo = new MembershipRepository();
 
-    // GET /collectivites/{id}/statistics
     public List<CollectivityLocalStatisticsResponse> getLocalStatistics(String collectivityId, LocalDate from, LocalDate to) {
         try {
             if (collectivityRepo.findById(collectivityId).isEmpty())
@@ -34,9 +35,9 @@ public class StatisticsService {
             List<Member> activeMembers = membershipRepo.findActiveMembersWithPaymentsByCollectivityId(collectivityId, from, to);
             List<CollectivityLocalStatisticsResponse> result = new ArrayList<>();
             for (Member member : activeMembers) {
-                double paid = getTotalPaidForMember(member.getId(), from, to); // on pourrait aussi obtenir le montant déjà chargé, mais on simplifie
+                double paid = getTotalPaidForMember(member.getId(), from, to);
                 double unpaid = Math.max(0, totalActiveFees - paid);
-                MemberDescription desc = buildMemberDescription(member);
+                MemberDescriptionResponse desc = buildMemberDescriptionResponse(member);
                 CollectivityLocalStatisticsResponse stat = new CollectivityLocalStatisticsResponse();
                 stat.setMemberDescription(desc);
                 stat.setEarnedAmount(paid);
@@ -54,8 +55,8 @@ public class StatisticsService {
         return paymentRepo.getTotalPaidByMemberAndPeriod(memberId, from, to);
     }
 
-    private MemberDescription buildMemberDescription(Member m) {
-        MemberDescription desc = new MemberDescription();
+    private MemberDescriptionResponse buildMemberDescriptionResponse(Member m) {
+        MemberDescriptionResponse desc = new MemberDescriptionResponse();
         desc.setId(m.getId());
         desc.setFirstName(m.getFirstName());
         desc.setLastName(m.getLastName());
@@ -80,7 +81,8 @@ public class StatisticsService {
                 double percentage = activeMembers.isEmpty() ? 0 : (upToDateCount * 100.0 / activeMembers.size());
                 int newMembers = membershipRepo.countNewMembersByCollectivityId(coll.getId(), from, to);
 
-                CollectivityInformation info = new CollectivityInformation();
+                // Utilisation de CollectivityInformationResponse
+                CollectivityInformationResponse info = new CollectivityInformationResponse();
                 info.setName(coll.getName() != null ? coll.getName() : "");
                 int num = 0;
                 try { if (coll.getNumber() != null) num = Integer.parseInt(coll.getNumber()); } catch (Exception e) {}
@@ -97,5 +99,4 @@ public class StatisticsService {
             throw new RuntimeException("Database error", e);
         }
     }
-}
 }
