@@ -1,4 +1,6 @@
--- 1. Nettoyage (ordre respectant les clés étrangères)
+-- 1. Nettoyage (ordre correct)
+DELETE FROM activity_attendance;
+DELETE FROM collectivity_activity;
 DELETE FROM member_payment;
 DELETE FROM collectivity_transaction;
 DELETE FROM membership_fee;
