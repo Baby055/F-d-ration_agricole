@@ -109,3 +109,27 @@ CREATE TABLE IF NOT EXISTS member_referee (
     FOREIGN KEY (member_id) REFERENCES member(id),
     FOREIGN KEY (referee_id) REFERENCES member(id)
     );
+
+    -- Table des activités d'une collectivité
+CREATE TABLE IF NOT EXISTS collectivity_activity (
+    id VARCHAR(36) PRIMARY KEY,
+    collectivity_id VARCHAR(36) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    activity_date DATE NOT NULL,
+    mandatory BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (collectivity_id) REFERENCES collectivity(id)
+);
+
+-- Table des présences à une activité (une fois enregistrée, non modifiable)
+CREATE TABLE IF NOT EXISTS activity_attendance (
+    id VARCHAR(36) PRIMARY KEY,
+    activity_id VARCHAR(36) NOT NULL,
+    member_id VARCHAR(36) NOT NULL,
+    present BOOLEAN NOT NULL,
+    excused BOOLEAN DEFAULT FALSE,
+    reason TEXT,
+    FOREIGN KEY (activity_id) REFERENCES collectivity_activity(id),
+    FOREIGN KEY (member_id) REFERENCES member(id),
+    UNIQUE(activity_id, member_id)   -- empêche la double saisie
+);
