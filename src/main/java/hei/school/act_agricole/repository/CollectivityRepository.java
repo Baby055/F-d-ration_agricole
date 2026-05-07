@@ -26,22 +26,24 @@ public class CollectivityRepository {
         }
     }
 
-    public Optional<Collectivity> findById(String id) throws SQLException {
-        String sql = "SELECT * FROM collectivity WHERE id = ?";
-        try (Connection conn = DataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                Collectivity c = new Collectivity();
-                c.setId(rs.getString("id"));
-                c.setLocation(rs.getString("location"));
-                c.setFederationApproval(rs.getBoolean("federation_approval"));
-                return Optional.of(c);
+        public Optional<Collectivity> findById(String id) throws SQLException {
+            String sql = "SELECT id, location, federation_approval, unique_number, unique_name FROM collectivity WHERE id = ?";
+            try (Connection conn = DataSource.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, id);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    Collectivity c = new Collectivity();
+                    c.setId(rs.getString("id"));
+                    c.setLocation(rs.getString("location"));
+                    c.setFederationApproval(rs.getBoolean("federation_approval"));
+                    c.setNumber(rs.getString("unique_number"));
+                    c.setName(rs.getString("unique_name"));
+                    return Optional.of(c);
+                }
+                return Optional.empty();
             }
-            return Optional.empty();
         }
-    }
 
         public boolean existsByNumber(String number) throws SQLException {
             String sql = "SELECT 1 FROM collectivity WHERE unique_number = ?";
