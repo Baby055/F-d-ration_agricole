@@ -1,6 +1,5 @@
--- Table member
 CREATE TABLE IF NOT EXISTS member (
-                                      id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     birth_date DATE NOT NULL,
@@ -13,18 +12,16 @@ CREATE TABLE IF NOT EXISTS member (
     federation_joining_date DATE NOT NULL
     );
 
--- Table collectivity
 CREATE TABLE IF NOT EXISTS collectivity (
-                                            id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     location VARCHAR(255) NOT NULL,
     federation_approval BOOLEAN NOT NULL,
     unique_number VARCHAR(50) UNIQUE,
     unique_name VARCHAR(100) UNIQUE
     );
 
--- Table membership
 CREATE TABLE IF NOT EXISTS membership (
-                                          id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     member_id VARCHAR(36) NOT NULL,
     collectivity_id VARCHAR(36) NOT NULL,
     start_date DATE NOT NULL,
@@ -33,9 +30,8 @@ CREATE TABLE IF NOT EXISTS membership (
     FOREIGN KEY (collectivity_id) REFERENCES collectivity(id)
     );
 
--- Table mandate
 CREATE TABLE IF NOT EXISTS mandate (
-                                       id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     member_id VARCHAR(36) NOT NULL,
     collectivity_id VARCHAR(36) NOT NULL,
     role VARCHAR(20) NOT NULL,
@@ -45,9 +41,8 @@ CREATE TABLE IF NOT EXISTS mandate (
     FOREIGN KEY (collectivity_id) REFERENCES collectivity(id)
     );
 
--- Table membership_fee
 CREATE TABLE IF NOT EXISTS membership_fee (
-                                              id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     collectivity_id VARCHAR(36) NOT NULL,
     eligible_from DATE NOT NULL,
     frequency VARCHAR(20) NOT NULL,
@@ -57,9 +52,8 @@ CREATE TABLE IF NOT EXISTS membership_fee (
     FOREIGN KEY (collectivity_id) REFERENCES collectivity(id)
     );
 
--- Table collectivity_transaction
 CREATE TABLE IF NOT EXISTS collectivity_transaction (
-                                                        id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     collectivity_id VARCHAR(36) NOT NULL,
     creation_date DATE NOT NULL,
     amount NUMERIC(15,2) NOT NULL,
@@ -70,9 +64,8 @@ CREATE TABLE IF NOT EXISTS collectivity_transaction (
     FOREIGN KEY (member_debited_id) REFERENCES member(id)
     );
 
--- Table member_payment
 CREATE TABLE IF NOT EXISTS member_payment (
-                                              id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     member_id VARCHAR(36) NOT NULL,
     membership_fee_id VARCHAR(36) NOT NULL,
     amount NUMERIC(15,2) NOT NULL,
@@ -84,9 +77,8 @@ CREATE TABLE IF NOT EXISTS member_payment (
     FOREIGN KEY (transaction_id) REFERENCES collectivity_transaction(id)
     );
 
--- Table financial_account
 CREATE TABLE IF NOT EXISTS financial_account (
-                                                 id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     collectivity_id VARCHAR(36),
     account_type VARCHAR(20) NOT NULL,
     holder_name VARCHAR(255),
@@ -101,16 +93,14 @@ CREATE TABLE IF NOT EXISTS financial_account (
     FOREIGN KEY (collectivity_id) REFERENCES collectivity(id)
     );
 
--- Table member_referee
 CREATE TABLE IF NOT EXISTS member_referee (
-                                              member_id VARCHAR(36),
+    member_id VARCHAR(36),
     referee_id VARCHAR(36),
     PRIMARY KEY (member_id, referee_id),
     FOREIGN KEY (member_id) REFERENCES member(id),
     FOREIGN KEY (referee_id) REFERENCES member(id)
     );
 
-    -- Table des activités d'une collectivité
 CREATE TABLE IF NOT EXISTS collectivity_activity (
     id VARCHAR(36) PRIMARY KEY,
     collectivity_id VARCHAR(36) NOT NULL,
@@ -121,7 +111,6 @@ CREATE TABLE IF NOT EXISTS collectivity_activity (
     FOREIGN KEY (collectivity_id) REFERENCES collectivity(id)
 );
 
--- Table des présences à une activité (une fois enregistrée, non modifiable)
 CREATE TABLE IF NOT EXISTS activity_attendance (
     id VARCHAR(36) PRIMARY KEY,
     activity_id VARCHAR(36) NOT NULL,
