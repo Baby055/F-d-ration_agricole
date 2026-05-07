@@ -10,7 +10,6 @@ public class CreateMembershipFeeRequest {
     private double amount;
     private String label;
 
-    // Getters and setters
     public LocalDate getEligibleFrom() {
         return eligibleFrom;
     }
