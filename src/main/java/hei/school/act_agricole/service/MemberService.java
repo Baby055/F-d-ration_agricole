@@ -38,12 +38,9 @@ public class MemberService {
     }
 
     private MemberResponse createOne(CreateMemberRequest req) throws SQLException {
-        // 1. Check that the collectivity exists
         if (collectivityRepository.findById(req.getCollectivityIdentifier()).isEmpty()) {
             throw new NotFoundException("Collectivity not found: " + req.getCollectivityIdentifier());
         }
-
-        // 2. Check referees: at least 2, all must be SENIOR
         if (req.getReferees() == null || req.getReferees().size() < 2) {
             throw new BadRequestException("At least 2 referees required");
         }
@@ -57,7 +54,7 @@ public class MemberService {
             }
         }
 
-        // 3. Rule: internal referees >= external referees
+        // Rule: internal referees >= external referees
         String targetCollectivityId = req.getCollectivityIdentifier();
         long internal = 0, external = 0;
         for (Member ref : referees) {
@@ -72,12 +69,10 @@ public class MemberService {
             throw new BadRequestException("Number of referees from target collectivity must be at least as many as from other collectivities");
         }
 
-        // 4. Payments
         if (!req.isRegistrationFeePaid() || !req.isMembershipDuesPaid()) {
             throw new BadRequestException("Registration fee and/or membership dues not paid");
         }
 
-        // 5. Create new member (occupation = JUNIOR)
         Member newMember = new Member();
         newMember.setId(UUID.randomUUID().toString());
         newMember.setFirstName(req.getFirstName());
@@ -92,7 +87,6 @@ public class MemberService {
         newMember.setFederationJoiningDate(LocalDate.now());
         memberRepository.save(newMember);
 
-        // 6. Register membership
         Membership membership = new Membership();
         membership.setId(UUID.randomUUID().toString());
         membership.setMemberId(newMember.getId());
@@ -101,7 +95,6 @@ public class MemberService {
         membership.setEndDate(null);
         membershipRepository.save(membership);
 
-        // 7. Build response
         List<MemberResponse> refereeResponses = referees.stream()
                 .map(this::toMemberResponseWithoutReferees)
                 .collect(Collectors.toList());
