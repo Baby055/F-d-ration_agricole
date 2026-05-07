@@ -11,34 +11,48 @@ public class AttendanceResponse {
     public String getMemberId() {
         return memberId;
     }
+
     public void setMemberId(String memberId) {
         this.memberId = memberId;
     }
+
     public String getFirstName() {
         return firstName;
     }
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
+
     public String getLastName() {
         return lastName;
     }
+
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
     public boolean isPresent() {
         return present;
     }
+
     public void setPresent(boolean present) {
         this.present = present;
     }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
     public boolean isExcused() {
         return excused;
     }
+
     public void setExcused(boolean excused) {
         this.excused = excused;
-    }
-    public String getReason() {
-        return reason;
     }
 }
